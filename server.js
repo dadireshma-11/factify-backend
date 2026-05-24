@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import dotenv from "dotenv";
 import cors from "cors";
+import nodemailer from "nodemailer";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -28,6 +29,33 @@ console.log(
   "Email (contact/alerts) configured:",
   !!(process.env.EMAIL_USER && process.env.EMAIL_PASS)
 );
+
+// Optional: create a transporter here for quick debugging/verification
+// Uses the same credentials expected by server/utils/sendEmail.js
+let debugTransporter = null;
+try {
+  const emailUser = (process.env.EMAIL_USER || process.env.SMTP_EMAIL || "").trim();
+  const emailPass = (process.env.EMAIL_PASS || process.env.SMTP_APP_PASSWORD || "").replace(/\s/g, "");
+
+  if (emailUser && emailPass) {
+    debugTransporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || "smtp.gmail.com",
+      port: Number(process.env.SMTP_PORT) || 465,
+      secure: true,
+      auth: {
+        user: emailUser,
+        pass: emailPass,
+      },
+    });
+
+    // Log transporter creation (do not verify automatically in production)
+    console.log("Debug email transporter created (not verified)");
+  } else {
+    console.log("Debug email transporter not created: missing EMAIL_USER/EMAIL_PASS");
+  }
+} catch (err) {
+  console.error("Failed to create debug email transporter:", err.message);
+}
 
 
 const app = express();
