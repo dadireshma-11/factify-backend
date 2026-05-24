@@ -32,23 +32,26 @@ console.log(
 
 // Optional: create a transporter here for quick debugging/verification
 // Uses the same credentials expected by server/utils/sendEmail.js
-let debugTransporter = null;
+let transporter = null;
 try {
   const emailUser = (process.env.EMAIL_USER || process.env.SMTP_EMAIL || "").trim();
   const emailPass = (process.env.EMAIL_PASS || process.env.SMTP_APP_PASSWORD || "").replace(/\s/g, "");
 
   if (emailUser && emailPass) {
-    debugTransporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "smtp.gmail.com",
-      port: Number(process.env.SMTP_PORT) || 465,
+    transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
       secure: true,
       auth: {
         user: emailUser,
         pass: emailPass,
       },
+      family: 4,
+      tls: {
+        rejectUnauthorized: false,
+      },
     });
 
-    // Log transporter creation (do not verify automatically in production)
     console.log("Debug email transporter created (not verified)");
   } else {
     console.log("Debug email transporter not created: missing EMAIL_USER/EMAIL_PASS");
