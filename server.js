@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import dotenv from "dotenv";
 import cors from "cors";
 import nodemailer from "nodemailer";
@@ -84,13 +85,17 @@ app.get("/", (req, res) => {
   res.send("Factify API is running...");
 });
 
-if (process.env.NODE_ENV === "production") {
-  const clientBuildPath = path.resolve("../client/dist");
+// Serve client build if present (works in production and preview environments)
+const clientBuildPath = path.resolve("../client/dist");
+if (fs.existsSync(clientBuildPath)) {
   app.use(express.static(clientBuildPath));
 
+  // SPA fallback: serve index.html for any non-API route
   app.get(/^(?!\/api).*$/, (req, res) => {
     res.sendFile(path.join(clientBuildPath, "index.html"));
   });
+} else {
+  console.log("Client build not found at", clientBuildPath, "- skipping static file serving");
 }
 
 // Global error handler
