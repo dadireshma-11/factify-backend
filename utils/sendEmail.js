@@ -40,6 +40,10 @@ const createTransporter = () => {
       user,
       pass,
     },
+    family: 4,
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 };
 
